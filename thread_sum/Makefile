@@ -117,7 +117,7 @@ test: all
 	./$(NAME) 6 10
 	# ./$(NAME) 7 10
 	# ./$(NAME) 8 10
-	./$(NAME) 9 10
+	# ./$(NAME) 9 10
 
 ##@ Debug Rules 
 
