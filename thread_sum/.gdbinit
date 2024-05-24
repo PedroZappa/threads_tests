@@ -9,6 +9,7 @@ define main
 	display *argv@argc
 	display data
 	display *data
+	display data->idx
 	display *data->idx
 	display threads@data.n_threads
 	display *list@data.n_numbers

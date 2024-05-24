@@ -13,10 +13,11 @@ typedef struct s_data
 	int		n_threads;
 	int		n_numbers;
 	int		n_per_thread;
-	int		sum;
+	int		res;
 	int		*idx;
 	t_mutex mtx_sum;
 	t_mutex mtx_printf;
+	t_mutex mtx_main;
 } t_data;
 
 void	*routine(void *arg);
@@ -58,35 +59,48 @@ int main(int argc, char **argv)
 		perror("Error: pthread_mutex_init");
 		exit(1);
 	}
+	if (pthread_mutex_init(&data->mtx_main, NULL))
+	{
+		perror("Error: pthread_mutex_init");
+		exit(1);
+	}
+
 	/** Create threads **/
 	for (i = 0; i < data->n_threads; i++)
 	{
 		data->idx = malloc(sizeof(int));
 		*data->idx = (i * data->n_per_thread);
-		printf("Thread %d: starts at idx %d\n", i, *data->idx);
+		printf("main: Creating Thread %d: starts at idx %d\n", i, *data->idx);
 		if (pthread_create(&threads[i], NULL, routine, data) != 0)
 		{
 			perror("Error: pthread_create");
 			exit(1);
 		}
-		usleep(1000);
+		usleep(100);
+		free(data->idx);
 	}
+
 	/** Join threads **/
 	g_sum = 0;
 	for (i = 0; i < data->n_threads; i++)
 	{
-		t_data *res;
+		int *res;
 		if (pthread_join(threads[i], (void **)&res) != 0)
 		{
 			perror("Error: pthread_join");
 			exit(1);
 		}
-		g_sum += res->sum;
-		usleep(100);
+		pthread_mutex_lock(&data->mtx_main);
+		g_sum += *res;
+		free(res);
+		pthread_mutex_unlock(&data->mtx_main);
 	}
 	printf("Global Sum: %d\n", g_sum);
+
 	/** Clean up **/
-	free(data->idx);
+	pthread_mutex_destroy(&data->mtx_sum);
+	pthread_mutex_destroy(&data->mtx_printf);
+	pthread_mutex_destroy(&data->mtx_main);
 	free(data);
 	free(list);
 	return (0);
@@ -97,20 +111,16 @@ int main(int argc, char **argv)
 /// @return		Pointer to the sum (Reference)
 void	*routine(void *ref)
 {
-	t_data *data;
-	data = (t_data *)ref;
-	usleep(100);
-	pthread_mutex_lock(&data->mtx_sum);
-	int sum = 0;
+	t_data	*data = (t_data *)ref;
+	int		*sum = malloc(sizeof(int));
+	*sum = 0;
 	for (int i = 0; i < data->n_per_thread; i++)
-		sum += *(list + *data->idx + i);
-	data->sum = sum;
-	pthread_mutex_unlock(&data->mtx_sum);
+		*sum += *(list + *data->idx + i);
 	pthread_mutex_lock(&data->mtx_printf);
-	printf("Thread Local Sum: %d\n", sum);
-	printf("Thread %d: %d = %d\n", *data->idx, sum, *data->idx);
+	printf("Thread %d: idx = %d\n", *data->idx, *data->idx);
+	printf("Thread Local Sum: %d\n", *sum);
 	pthread_mutex_unlock(&data->mtx_printf);
-	return (ref);
+	return ((void *)sum);
 }
 
 int	*gen_list(int n)
