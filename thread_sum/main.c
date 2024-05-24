@@ -41,6 +41,7 @@ int main(int argc, char **argv)
 		perror("Error: Invalid number of arguments");
 		exit(1);
 	}
+	/** Initialize data **/
 	data = malloc(sizeof(t_data));
 	data->n_threads = atoi(argv[1]);
 	pthread_t threads[data->n_threads];
@@ -57,16 +58,20 @@ int main(int argc, char **argv)
 		perror("Error: pthread_mutex_init");
 		exit(1);
 	}
+	/** Create threads **/
 	for (i = 0; i < data->n_threads; i++)
 	{
 		data->idx = malloc(sizeof(int));
 		*data->idx = (i * data->n_per_thread);
-		if (pthread_create(&threads[i], NULL, routine, (void *)data) != 0)
+		printf("Thread %d: starts at idx %d\n", i, *data->idx);
+		if (pthread_create(&threads[i], NULL, routine, data) != 0)
 		{
 			perror("Error: pthread_create");
 			exit(1);
 		}
+		usleep(1000);
 	}
+	/** Join threads **/
 	g_sum = 0;
 	for (i = 0; i < data->n_threads; i++)
 	{
@@ -77,8 +82,10 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 		g_sum += res->sum;
+		usleep(100);
 	}
 	printf("Global Sum: %d\n", g_sum);
+	/** Clean up **/
 	free(data->idx);
 	free(data);
 	free(list);
@@ -91,17 +98,18 @@ int main(int argc, char **argv)
 void	*routine(void *ref)
 {
 	t_data *data;
-	int sum = 0;
 	data = (t_data *)ref;
 	usleep(100);
 	pthread_mutex_lock(&data->mtx_sum);
+	int sum = 0;
 	for (int i = 0; i < data->n_per_thread; i++)
 		sum += *(list + *data->idx + i);
+	data->sum = sum;
 	pthread_mutex_unlock(&data->mtx_sum);
 	pthread_mutex_lock(&data->mtx_printf);
 	printf("Thread Local Sum: %d\n", sum);
+	printf("Thread %d: %d = %d\n", *data->idx, sum, *data->idx);
 	pthread_mutex_unlock(&data->mtx_printf);
-	data->sum = sum;
 	return (ref);
 }
 

@@ -6,8 +6,8 @@ MAKE	= make -C
 SHELL	:= bash
 
 # Default test values
-ARG				= 2 10
-TIMESTEP		= 100
+ARG			= 2 10
+TIMESTEP	= 100
 TIMEOUT		= 10
 ITER		= 10
 
@@ -108,6 +108,13 @@ get_libft:
 
 ##@ Test Rules 🧪
 
+test: all
+	@echo "$(YEL)Testing $(MAG)$(NAME)$(YEL) simple input$(D)"
+	./$(NAME) 2 10
+	# ./$(NAME) 3 10
+	# ./$(NAME) 4 10
+	# ./$(NAME) 5 10
+
 ##@ Debug Rules 
 
 gdb: all $(NAME) $(TEMP_PATH)			## Debug w/ gdb
@@ -123,6 +130,7 @@ vgdb: all $(NAME) $(TEMP_PATH)			## Debug w/ valgrind (memcheck) & gdb
 	make get_log
 
 valgrind: all $(NAME) $(TEMP_PATH)			## Debug w/ valgrind (memcheck)
+	tmux set-option remain-on-exit on
 	tmux split-window -h "valgrind --leak-check=full --show-leak-kinds=all -s ./$(NAME) $(ARG)"
 
 helgrind: all $(NAME) $(TEMP_PATH)			## Debug threads w/ helgrind
