@@ -111,9 +111,9 @@ get_libft:
 test: all
 	@echo "$(YEL)Testing $(MAG)$(NAME)$(YEL) simple input$(D)"
 	./$(NAME) 2 10
-	# ./$(NAME) 3 10
-	# ./$(NAME) 4 10
-	# ./$(NAME) 5 10
+	./$(NAME) 3 10
+	./$(NAME) 4 10
+	./$(NAME) 5 10
 
 ##@ Debug Rules 
 
