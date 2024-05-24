@@ -112,8 +112,12 @@ test: all
 	@echo "$(YEL)Testing $(MAG)$(NAME)$(YEL) simple input$(D)"
 	./$(NAME) 2 10
 	./$(NAME) 3 10
-	./$(NAME) 4 10
-	./$(NAME) 5 10
+	# ./$(NAME) 4 10
+	# ./$(NAME) 5 10
+	./$(NAME) 6 10
+	# ./$(NAME) 7 10
+	# ./$(NAME) 8 10
+	./$(NAME) 9 10
 
 ##@ Debug Rules 
 

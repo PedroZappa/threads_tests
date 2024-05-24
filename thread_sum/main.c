@@ -70,7 +70,6 @@ int main(int argc, char **argv)
 	{
 		data->idx = malloc(sizeof(int));
 		*data->idx = (i * data->n_per_thread);
-		printf("main: Creating Thread %d: starts at idx %d\n", i, *data->idx);
 		if (pthread_create(&threads[i], NULL, routine, data) != 0)
 		{
 			perror("Error: pthread_create");
